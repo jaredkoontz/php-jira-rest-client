@@ -776,12 +776,9 @@ $jql = 'project not in (TEST)  and assignee = currentUser() and status in (Resol
 
 try {
     $issueService = new IssueService();
-
-    $pagination = -1;
-  
+    
     $startAt = 0;	//the index of the first issue to return (0-based)    
     $maxResult = 3;	// the maximum number of issues to return (defaults to 50). 
-    $totalCount = -1;	// the number of issues to return
   
     // first fetch
     $ret = $issueService->search($jql, $startAt, $maxResult);
@@ -792,10 +789,10 @@ try {
         print (sprintf("%s %s \n", $issue->key, $issue->fields->summary));
     }
   	
-    // fetch remained data
-    $page = $totalCount / $maxResult;
+    // fetch remaining data
+    $startAt += $maxResult;
 
-    for ($startAt = 1; $startAt < $page; $startAt++) {
+    while($startAt < $totalCount){
         $ret = $issueService->search($jql, $startAt, $maxResult);
 
         print ("\nPaging $startAt\n");
@@ -803,6 +800,7 @@ try {
         foreach ($ret->issues as $issue) {
             print (sprintf("%s %s \n", $issue->key, $issue->fields->summary));
         }
+	$startAt += $maxResult;
     }     
 } catch (JiraException $e) {
     $this->assertTrue(false, 'testSearch Failed : '.$e->getMessage());
